@@ -34,6 +34,12 @@
             <artifactId>asm</artifactId>
             <version>6.1.1</version> <!-- Use newer version of ASM -->
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>RELEASE</version>
+        </dependency>
     </dependencies>
 
 </project>
