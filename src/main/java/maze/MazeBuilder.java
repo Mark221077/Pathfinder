@@ -57,7 +57,7 @@ public class MazeBuilder {
         for (int row = 0; row < input.size(); ++row) {
             var str = input.get(row);                     //a line with a row
             for (int col = 0; col < str.length(); ++col) {   //iterate through the row
-                Node n = new Node(row, col);                //a new node, with the coordinates
+                Node n = new Node(col, row);                //a new node, with the coordinates
                 char c = str.charAt(col);                   //the char in the current column
                 if (c == 'S') {
                     n.setSourceNode(true);         //source

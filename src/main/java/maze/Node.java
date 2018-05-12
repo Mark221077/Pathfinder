@@ -1,12 +1,76 @@
 package maze;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Node {
     private int x;
     private int y;
 
-    boolean sourceNode = false, targetNode = false;
+    private boolean sourceNode = false, targetNode = false;
+
+    private double distFromStart = Double.MAX_VALUE;
+    private double heuristicDist = Double.MAX_VALUE;
+
+    private Node parentNode = this;
+
+    //map of neighbors with weight
+    private Map<Node, Integer> neighbors = new HashMap<>();
+    
+    
+
+
+    public Node(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+
+        if(! (obj instanceof Node)) return false;
+
+        Node n = (Node) obj;
+
+        return x == n.x && y == n.y;
+    }
+
+    public void connect(Node n) {
+        connect(n, 1);
+    }
+
+    public void connect(Node n, int weight) {
+        neighbors.put(n, weight);               //add the connection to the map
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void calcHeuristicDist(Node n) {
+        heuristicDist = Math.sqrt(Math.pow(x - n.x, 2) + Math.pow(y - n.y, 2));
+    }
+
+    public double getDistFromStart() {
+        return distFromStart;
+    }
+
+    public void setDistFromStart(double distFromStart) {
+        this.distFromStart = distFromStart;
+    }
+
+    public double getHeuristicDist() {
+        return heuristicDist;
+    }
+
+    public double getFinalDist() {
+        return distFromStart + heuristicDist;
+    }
 
     public boolean isSourceNode() {
         return sourceNode;
@@ -24,27 +88,15 @@ public class Node {
         this.targetNode = targetNode;
     }
 
-    private ArrayList<Edge> edges = new ArrayList<>();
-
-    public ArrayList<Edge> getEdges() {
-        return edges;
+    public Map<Node, Integer> getNeighbors() {
+        return neighbors;
     }
 
-    public Node(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Node getParentNode() {
+        return parentNode;
     }
 
-    public double directDistance(Node n) {
-        return Math.sqrt(Math.pow(x - n.x, 2) + Math.pow(y - n.y, 2));
+    public void setParentNode(Node parentNode) {
+        this.parentNode = parentNode;
     }
-
-    public Edge connect(Node n) {
-        Edge edge = new Edge(this, n);
-        edges.add(edge);        //add this edge to both nodes
-        n.edges.add(edge);
-        return edge;            //return reference to the new edge
-    }
-
-
 }
