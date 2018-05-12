@@ -12,46 +12,45 @@ public class MazeBuilder {
 
 
     public Maze build(File file) {
-        var input = new ArrayList<String>();
+        var input = new ArrayList<String>();        //will contain the rows as string
         try (BufferedReader r = new BufferedReader(new FileReader(file))){
             String line;
-            while((line = r.readLine()) != null) {
-                if(line.length() > 0)
+            while((line = r.readLine()) != null) {  //is null when EOF
+                line = line.trim();                 //remove whitespaces
+                if(line.length() > 0)               //line is not empty
                     input.add(line);
             }
         } catch (IOException ex) {
             System.out.println("Couldn't read the file");
         }
 
-        return build(input);
+        return build(input);                        //build the maze from the input
     }
 
 
     public Maze build(ArrayList<String> input) {
         var maze = new Maze();
         if (input == null || input.size() == 0)
-            return null;
-
+            throw new InvalidMazeException("No or empty input file");
 
         //check if the input has a rectangular shape, all rows are the same
         var width = input.get(0).length();
         for (var row : input) {
-            if (width != row.length()) return maze;      //one row doesnt have the same length as the first one
+            if (width != row.length())
+                throw new InvalidMazeException("Maze is not rectangular");             //one row doesnt have the same length as the first one
         }
 
         //convert the array list to 2D Node array/matrix,
         var matrix = new ArrayList<ArrayList<Node>>(input.size());
-
         //initialize the row lists
         for (int i = 0; i < input.size(); ++i)
             matrix.add(new ArrayList<>(width));
 
-
+        //count the source and target nodes for error checking
         int beginNodeCount = 0, targetNodeCount = 0;
 
+        //search for these nodes during iteration
         Node sourceNode = null, targetNode = null;
-
-        //TODO: optimize this by converting to one iteration
 
         //fill the matrix
         for (int row = 0; row < input.size(); ++row) {
@@ -72,29 +71,27 @@ public class MazeBuilder {
                 if (c != '#')                            //not blocked
                     matrix.get(row).add(col, n);
                 else matrix.get(row).add(col, null);           //if blocked, it means no node is there
-
             }
         }
 
-        if (beginNodeCount > 1 || targetNodeCount > 1)           //more than one source/target node
-            return null;                        //return null for error
+        if (beginNodeCount != 1 || targetNodeCount != 1)           //more than one source/target node
+            throw new InvalidMazeException("Zero or more than 1 source/target nodes");
 
         //now we iterate through the matrix, connecting all the not-null nodes
 
+        for (int row = 0; row < matrix.size() - 1; ++row) {     //size - 1 because we access the row below too
+            var nodes = matrix.get(row);                        //get a row
 
-        for (int row = 0; row < matrix.size() - 1; ++row) {
-            var nodes = matrix.get(row);
-
-            for (int col = 0; col < nodes.size() - 1; ++col) {
+            for (int col = 0; col < nodes.size() - 1; ++col) {  //size - 1 because we access the row on the right side
                 var currNode = nodes.get(col);
                 var rightNode = nodes.get(col + 1);
-                var belowNode = matrix.get(row + 1).get(col);
+                var belowNode = matrix.get(row + 1).get(col);   //reference to the nodes
 
-                if (currNode != null) {
+                if (currNode != null) {                     //if the current node is null/blocked, cant be connected
                     if (rightNode != null)
-                        currNode.connect(rightNode);
+                        currNode.connect(rightNode);        //if there is a next ot this, connect it
                     if (belowNode != null)
-                        currNode.connect(belowNode);
+                        currNode.connect(belowNode);        //if there is a node below this, connect it
                 }
             }
         }
@@ -103,7 +100,7 @@ public class MazeBuilder {
         //so now we can store them in a simple list
         //the connections remain the same
         //we add them to the maze
-        //the null Nodes are not included
+        //the null/blocked Nodes are not included
         for (var list : matrix) {
             for(var node : list) {
                 if(node != null)
@@ -112,7 +109,7 @@ public class MazeBuilder {
         }
 
         //set the source and target nodes
-        maze.setBeginNode(sourceNode);
+        maze.setSourceNode(sourceNode);
         maze.setTargetNode(targetNode);
 
         //everything is done, return the maze

@@ -7,18 +7,18 @@ public class MazeAstarSolver {
     private Maze maze;
     private ArrayList<Node> nodeList;
 
-    PriorityQueue<Node> openList = new PriorityQueue<>(Comparator.comparingDouble(Node::getFinalDist));
+    private PriorityQueue<Node> openList = new PriorityQueue<>(Comparator.comparingDouble(Node::getFinalDist));
 
-    ArrayList<Node> closedList= new ArrayList<>();
+    private ArrayList<Node> closedList= new ArrayList<>();
 
-    ArrayList<Node> path = null;
+    private ArrayList<Node> path = null;
 
     private Node sourceNode, targetNode;
 
     public MazeAstarSolver(Maze maze) {
         this.maze = maze;
         nodeList = new ArrayList<>(maze.getNodesList().size());
-        sourceNode = maze.getBeginNode();
+        sourceNode = maze.getSourceNode();
         targetNode = maze.getTargetNode();
     }
 
@@ -75,7 +75,7 @@ public class MazeAstarSolver {
     }
 
 
-    public String showSolution() {
+    public String getStringSolution() {
         String str = maze.stringFormat();
         String[] rows = str.split("\n");
 
@@ -89,6 +89,23 @@ public class MazeAstarSolver {
                 }
             }
             builder.append(row).append("\n");
+        }
+
+        return builder.toString();
+    }
+
+    public String getDirections() {
+        StringBuilder builder = new StringBuilder(path.size());
+        for(var node : path) {
+            if(node == sourceNode) continue;                //skip the source node, we are already there
+            if(node.getParentNode().getY() < node.getY())
+                builder.append('d');                                //parent node is above this node
+            else if(node.getParentNode().getY() > node.getY())
+                builder.append('u');                                //parent node is below this
+            else if(node.getParentNode().getX() < node.getX())
+                builder.append('r');                                //parent node is on the left side of this
+            else if(node.getParentNode().getX() > node.getX())
+                builder.append('l');                                //parent node is on the right side of this
         }
 
         return builder.toString();
