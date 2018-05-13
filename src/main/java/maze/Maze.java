@@ -60,7 +60,7 @@ public class Maze {
     }
 
 
-    public String stringFormat() {
+    public String stringFormat() {      //returns this maze in the same format as the input
         if(nodeMatrix == null)
             return "";              //the node matrix was not set, cant be printed
 
@@ -82,41 +82,44 @@ public class Maze {
         return builder.toString();
     }
 
-    public void solve() {
+    public void solve() {               //solves this maze using A* algorithm
         makeUnSolved();
-        MazeAstarSolver solver = new MazeAstarSolver(this);
+        MazeAstarSolver solver = new MazeAstarSolver(sourceNode, targetNode);
         solution = solver.solve();      //try to solve the maze, null if cant
-        if(solution != null) {
-            solved = true;
-            directions = solver.getDirections();
+        if(solution != null) {          //solution has the nodes of the path
+            solved = true;              //the maze is solved
+            directions = solver.getDirections();        //the path
         }
-        else {
-            throw new InvalidMazeException("Maze cannot be solved");
+        else {                          //the maze is unsolvable
+            solved = true;              //it is "solved", but has no solution
+            unSolvable = true;          //unsolvable maze
         }
     }
 
     public String getDirections() {
-        if(solved) return directions;
-        else if(unSolvable) return "Unsolvable";
-        else return "";
+        if(solved) {
+            if (unSolvable) return "Unsolvable";    //unsolvable maze
+            else return directions;             //string containing the directions
+        }
+        else return "";                     //not yet solved
     }
 
-    public String getStringSolution() {
+    public String getSolutionMatrix() {     // returns the string representation of this maze with the solution
 
-        if(!solved) return "Not solved";
+        if(!solved) return "";              //maze not yet solved
 
-        if(unSolvable) return "Unsolvable";
+        if(unSolvable) return "Unsolvable"; //unsolvable maze
 
-        String str = stringFormat();
-        String[] rows = str.split("\n");
+        String str = stringFormat();                    //the string maze w/o the solution
+        String[] rows = str.split("\n");            //split the string into rows
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();        //builder for the combined solution
 
         for(int i = 0; i < rows.length; ++i) {
-            StringBuilder row = new StringBuilder(rows[i]);
+            StringBuilder row = new StringBuilder(rows[i]);     //builder for the row, easier to replace characters
             for(var node : solution) {
                 if(node.getY() == i && !node.isSourceNode() && !node.isTargetNode()) {
-                    row.setCharAt(node.getX() , '*');
+                    row.setCharAt(node.getX() , '*');           //if this node is path, add to solution
                 }
             }
             builder.append(row).append("\n");

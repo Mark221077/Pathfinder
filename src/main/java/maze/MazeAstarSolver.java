@@ -4,73 +4,72 @@ import java.util.*;
 
 public class MazeAstarSolver {
 
-    private Maze maze;
-    private ArrayList<Node> nodeList;
-
+    //contains the newly found and not yet visited nodes
+    //Priority Queue is ordered by the final distance of the node
+    //the distance from the start node plus the heuristic distance to the target node
     private PriorityQueue<Node> openList = new PriorityQueue<>(Comparator.comparingDouble(Node::getFinalDist));
 
+    //contains the visited nodes
     private ArrayList<Node> closedList= new ArrayList<>();
 
+    //the path to the solution
     private ArrayList<Node> path = null;
 
     private Node sourceNode, targetNode;
 
-    public MazeAstarSolver(Maze maze) {
-        this.maze = maze;
-        nodeList = new ArrayList<>(maze.getNodesList().size());
-        sourceNode = maze.getSourceNode();
-        targetNode = maze.getTargetNode();
+    public MazeAstarSolver(Node sourceNode, Node targetNode) {
+        if(sourceNode == null || targetNode == null)
+            throw new IllegalArgumentException("Argument was null");
+        this.sourceNode = sourceNode;
+        this.targetNode = targetNode;
     }
 
     public ArrayList<Node> solve() {
-        openList.add(sourceNode);
+        openList.add(sourceNode);       //add the source to the openList
+                                        //we know this node exists
 
-        sourceNode.setDistFromStart(0);
-        sourceNode.calcHeuristicDist(targetNode);
+        sourceNode.setDistFromStart(0);         //the distance from itself is 0
+        sourceNode.calcHeuristicDist(targetNode);       //the heuristic distance from the target node
 
-        while (!openList.isEmpty()) {
-            Node current = openList.poll();
-            closedList.add(current);
+        while (!openList.isEmpty()) {           //we have nodes to check
+            Node current = openList.poll();     //get the node with the best finalDistance
+            closedList.add(current);            //mark this node as evaluated
 
-            if(current.equals(targetNode)) {
-                path = reconstructPath();
+            if(current.equals(targetNode)) {        //if this is the target, finish
+                path = reconstructPath();           //path will contain the nodes of the path
                 return path;
             }
 
-            for(var negihbor : current.getNeighbors().entrySet()) {
-                Node node = negihbor.getKey();
-                int weight = negihbor.getValue();
-                node.calcHeuristicDist(targetNode);
+            for(var neighbor : current.getNeighbors().entrySet()) {     //get the entries of the neighbor map
+                Node node = neighbor.getKey();              //the key is the node
+                int weight = neighbor.getValue();           //the weight is the cost of getting from the current node to the neighbor
                 if(closedList.contains(node)) continue;     //this node was already evaluated
+                node.calcHeuristicDist(targetNode);         //calculate the heuristic distance to the target node for the neighbor
 
                 if(!openList.contains(node)) openList.add(node);        //found a new node
 
-                double score = current.getDistFromStart() + weight;
+                double score = current.getDistFromStart() + weight;     //the new length of the path to this node through current
 
-                if(score < node.getDistFromStart()) {
-                    node.setParentNode(current);
-                    node.setDistFromStart(score);
+                if(score < node.getDistFromStart()) {               //if better than its current length from start
+                    node.setParentNode(current);                    //make its parent node the current node
+                    node.setDistFromStart(score);                   //set the distance from start
                 }
             }
         }
-        path = null;
-        return null;
+        path = null;        //maze could not be solved, couldn't get to target node
+        return null;        //indicating error
 
     }
 
     private ArrayList<Node> reconstructPath() {
-        var nodeStack = new Stack<Node>();
-        var currNode = targetNode;
-        nodeStack.add(currNode);
+        var list = new ArrayList<Node>();
+        var currNode = targetNode;              //we start from the target node
+        list.add(currNode);                     //add this node
         do  {
-            currNode = currNode.getParentNode();
-            nodeStack.add(currNode);
-        } while (currNode != sourceNode);
-
-        var list = new ArrayList<Node>(nodeStack.size());
-
-        while(nodeStack.size() > 0)
-            list.add(nodeStack.pop());
+            currNode = currNode.getParentNode();        //get its parent node
+            list.add(currNode);
+        } while (currNode != sourceNode && currNode.getParentNode() != null);       //while not at source node, or not on null(error)
+        Collections.reverse(list);              //path should go from source to target
         return list;
     }
 

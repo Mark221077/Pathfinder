@@ -14,27 +14,27 @@ public class Main {
         }
 
         File file = new File(args[0]);
-        long solveTime = 0;
-        Maze maze = null;
+        long solveTime;             //for verbose info
+        Maze maze;
         try {
-            maze = new MazeBuilder().build(file);
+            maze = new MazeBuilder().build(file);           //try to build from the argument
             long beginTime = System.currentTimeMillis();
             maze.solve();
-            solveTime = System.currentTimeMillis() - beginTime;
-            System.out.println(maze.getDirections());
+            solveTime = System.currentTimeMillis() - beginTime;     //calculate the solve time
+            System.out.println(maze.getDirections());               //print the directions
         } catch (InvalidMazeException ex) {
-            System.out.println(ex.getMessage());
-            return;
+            System.out.println(ex.getMessage());                //thrown if error with the file or maze not solvable
+            return;                                     //nothing else to do
         }
 
 
         for(var argument : args) {
-            if(argument.equals("-v")) {
+            if(argument.equals("-v")) {             //if verbose
                 System.out.println();
-                if(maze.isSolved()) {
-                    System.out.println("Path length: " + maze.getDirections().length());
-                    System.out.println("Solve took " + solveTime + "ms");
-                    System.out.println(maze.getStringSolution());
+                if(maze.isSolved()) {               //if the maze was solved
+                    System.out.println("Path length: " + maze.getDirections().length());        //the length of the path
+                    System.out.println("Solve took " + solveTime + "ms");           //the time it took to solve the maze
+                    System.out.println(maze.getSolutionMatrix());                       //the string representation of the solution
                 }
 
             }
