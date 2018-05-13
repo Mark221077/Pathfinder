@@ -20,18 +20,18 @@ public class MazeBuilder {
                 if(line.length() > 0)               //line is not empty
                     input.add(line);
             }
+            return build(input);
         } catch (IOException ex) {
-            System.out.println("Couldn't read the file");
+            throw new InvalidMazeException("Invalid input file");
         }
 
-        return build(input);                        //build the maze from the input
     }
 
 
     public Maze build(ArrayList<String> input) {
         var maze = new Maze();
-        if (input == null || input.size() == 0)
-            throw new InvalidMazeException("No or empty input file");
+        if (input.size() == 0)
+            throw new InvalidMazeException("Invalid maze");
 
         //check if the input has a rectangular shape, all rows are the same
         var width = input.get(0).length();
@@ -79,21 +79,21 @@ public class MazeBuilder {
 
         //now we iterate through the matrix, connecting all the not-null nodes
 
-        for (int row = 0; row < matrix.size() - 1; ++row) {     //size - 1 because we access the row below too
+        for (int row = 0; row < matrix.size(); ++row) {
             var nodes = matrix.get(row);                        //get a row
 
-            for (int col = 0; col < nodes.size() - 1; ++col) {  //size - 1 because we access the row on the right side
+            for (int col = 0; col < nodes.size(); ++col) {
                 var currNode = nodes.get(col);
-                var rightNode = nodes.get(col + 1);
-                var belowNode = matrix.get(row + 1).get(col);   //reference to the nodes
+                if(currNode == null) continue;                      //if this is null, do nothing
+                if(col + 1 < nodes.size() && nodes.get(col + 1) != null)        //if the node is not in the last column
+                    currNode.connect(nodes.get(col + 1));                   //and the node next to it is not null connect
 
-                if (currNode != null) {                     //if the current node is null/blocked, cant be connected
-                    if (rightNode != null)
-                        currNode.connect(rightNode);        //if there is a next ot this, connect it
-                    if (belowNode != null)
-                        currNode.connect(belowNode);        //if there is a node below this, connect it
-                }
+                if(row + 1 < matrix.size() && matrix.get(row + 1).get(col) != null)     //if not the last row
+                    currNode.connect(matrix.get(row + 1).get(col));         //if there is a node below, connect it
+
             }
+
+
         }
 
         //all the nodes are connected in the matrix

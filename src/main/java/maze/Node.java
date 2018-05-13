@@ -9,9 +9,9 @@ public class Node {
 
     private boolean sourceNode = false, targetNode = false;
 
-    private double distFromStart = Double.MAX_VALUE;
-    private double heuristicDist = Double.MAX_VALUE;
-    private Node parentNode = this;
+    private double distFromStart = Double.MAX_VALUE;        //the distance from the start node, default infinite
+    private double heuristicDist = Double.MAX_VALUE;        //the heuristic distance from the target node, default infinite
+    private Node parentNode = null;                     //the parent node on the path, if no path, no parent node
 
     //map of neighbors with weight
     //could be a simple list in this case
@@ -36,7 +36,7 @@ public class Node {
 
     public void connect(Node n) {               //the default weight of a connection/edge is 1
         connect(n, 1);
-    }
+    }       //the default weight is 1
 
     public void connect(Node n, int weight) {
         neighbors.put(n, weight);               //add the connection to this map
