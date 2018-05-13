@@ -75,24 +75,7 @@ public class MazeAstarSolver {
     }
 
 
-    public String getStringSolution() {
-        String str = maze.stringFormat();
-        String[] rows = str.split("\n");
 
-        StringBuilder builder = new StringBuilder();
-
-        for(int i = 0; i < rows.length; ++i) {
-            StringBuilder row = new StringBuilder(rows[i]);
-            for(var node : path) {
-                if(node.getY() == i && !node.isSourceNode() && !node.isTargetNode()) {
-                    row.setCharAt(node.getX() , '*');
-                }
-            }
-            builder.append(row).append("\n");
-        }
-
-        return builder.toString();
-    }
 
     public String getDirections() {
         StringBuilder builder = new StringBuilder(path.size());

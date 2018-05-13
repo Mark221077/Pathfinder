@@ -11,6 +11,8 @@ public class Maze {
 
     private boolean solved = false;
 
+    private boolean unSolvable = false;
+
     public boolean isSolved() {
         return solved;
     }
@@ -95,6 +97,31 @@ public class Maze {
 
     public String getDirections() {
         if(solved) return directions;
-        else return "Maze not yet solved";
+        else if(unSolvable) return "Unsolvable";
+        else return "";
+    }
+
+    public String getStringSolution() {
+
+        if(!solved) return "Not solved";
+
+        if(unSolvable) return "Unsolvable";
+
+        String str = stringFormat();
+        String[] rows = str.split("\n");
+
+        StringBuilder builder = new StringBuilder();
+
+        for(int i = 0; i < rows.length; ++i) {
+            StringBuilder row = new StringBuilder(rows[i]);
+            for(var node : solution) {
+                if(node.getY() == i && !node.isSourceNode() && !node.isTargetNode()) {
+                    row.setCharAt(node.getX() , '*');
+                }
+            }
+            builder.append(row).append("\n");
+        }
+
+        return builder.toString();
     }
 }
